@@ -1,0 +1,75 @@
+rule all:
+    input:
+        "params/philosopher_tmt11.yml",
+        "move2.sh"
+
+rule create_filedirs_annotations:
+    input:
+        sample_mapping="/DATA/Jasmine/philosopher_tmt11_setup/S054_CPTAC_HNSCC_TMT11_Label_to_Sample_Mapping_File_JHU_May2020_r1.csv"
+    script:
+        "create.py"
+
+rule create_dirs:
+    output:
+        "done.txt"
+    shell:
+        """
+        mkdir bin
+        mkdir params
+        mkdir database
+        cp /shared/agami/uniprot_human_W_F_rem_con.fas database/
+	cp /shared/agami/TMTIntegrator-v3.0.0.jar bin/
+        cp /shared/agami/MSFragger-3.0.zip bin/
+	cp -r /shared/agami/philosopher bin/
+        mv bin/philosopher/philosopher.yml params/
+	unzip bin/MSFragger-3.0.zip -d bin/
+	rm bin/MSFragger-3.0.zip
+	touch {output}
+        """
+
+rule parameter_file:
+    input:
+        path_database="database/uniprot_human_W_F_rem_con.fas",
+        path_MSFragger="bin/MSFragger-3.0/MSFragger-3.0.jar",
+        path_TMTintegrator="bin/TMTIntegrator-v3.0.0.jar",
+        input_file="params/philosopher.yml"
+    output:
+        params="params/philosopher_tmt11.yml"
+    script:
+        "philosopher_tmt11.py"
+        
+rule filelinks:
+    input:
+        "/DATA/Jasmine/philosopher_tmt11_setup/PDC_file_manifest_09032021_152102.csv"
+    output:
+        "filelinks.txt"
+    shell:
+        """
+        cat {input} | awk 'NR>1' | tr ',' '\t' | awk '{{print $NF}}' | sed 's/^"//' | sed 's/"//' > {output}
+        """
+
+rule get_files:
+    input:
+        rules.filelinks.output
+    output:
+        "move.sh"
+    shell:
+        """
+        wget -i {input}
+        ls *gz* | tr "?" "\t" | awk '{{print "mv " $1 "* " $1}}' > {output}
+        chmod +x {output}
+        ./{output}
+        gunzip *.gz
+        """
+
+rule move_mzML:
+    input:
+        rules.get_files.output
+    output:
+        "move2.sh"
+    shell:
+        """
+        ls *mzML -1  | sed 's/_/\t/g' | cut -f1 | awk '{{print "mv "$1"*mzML "$1"_*/"}}' | sort -u > {output}
+        chmod +x {output}
+        ./{output}
+        """

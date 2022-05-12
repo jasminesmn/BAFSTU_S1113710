@@ -1,0 +1,37 @@
+Snakemake pipeline to automatically download datasets and format them properly, specifically for TMT11 datasets.
+This pipeline carries out the following steps:
+
+    rule create_filedirs_annotations:
+        - Creates a folder for each of the whole proteome plexes and their annotation file
+
+    rule create_dirs:
+      (All required software and files in this step must be present in the specified paths.)
+        - Creates folder named bin for software tools to be used (MSFragger, Philosopher and TMTIntegrator)
+        - Creates a folder named params for the parameters file
+        - Creates a folder named database for the protein sequence FASTA file
+
+
+    rule parameter_file:
+        - Modifies the parameter file as desired
+
+    rule filelinks:
+      (PDC provides downloadable links for every mzML file available. These links can be downloaded
+      in a csv file. This file also contains other information which can be left out.)
+        - Extracts all downloadable links from the csv file and writes it to 'filelinks.txt'
+
+    rule get_files:
+        - Downloads all links in 'filelinks.txt'
+        - Removes unnecessary extensions from downloaded mzML files
+        - Unzips all mzML files
+
+    rule move_mzML:
+        - Moves mzML to its corresponding proteome plex directory
+
+
+First, the first two rules need to be ran separately with the following commands:
+snakemake -d [Cancer type]_philosopher create_filedirs_annotations
+snakemake -d [Cancer type]_philosopher create_dirs
+
+Second, the last rules will be run with the following command:
+snakemake -d [Cancer type]_philosopher
+

@@ -1,6 +1,4 @@
 from Bio import SeqIO
-import os
-
 
 def TRYPSIN(seq):
     """

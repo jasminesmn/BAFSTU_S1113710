@@ -1,0 +1,1 @@
+$bin/philosopher database --custom [custom protein sequence fasta file] --contam

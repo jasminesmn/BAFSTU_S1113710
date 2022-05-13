@@ -1,3 +1,7 @@
+# ratio_peptide_None.tsv (output from philosopher-TMTIntegrator) is used for further analysis.
+#Extracted substitutants for all W>X combinations using bash command: grep -Fwf W_F.txt ratio_peptide_None.tsv > W_F.txtratio_peptide_None.tsv
+#created files for R analysis
+
 library ("dplyr")
 #reading PSM files for all W-substitutants
 wf = read.table ("~/Desktop/PDA/W_F.txtratio_peptide_None.tsv", head=T)

@@ -1,0 +1,6 @@
+Used parameter files in Philosopher pipeline for TMT10 and TMT11 datasets.
+
+To run the pipeline, the next Philosopher pipeline command was used:
+
+$ bin/philosopher pipeline --config params/[parameter file] [list of proteome plex directories]
+
